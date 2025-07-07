@@ -13,20 +13,6 @@ export const CAMERA_ANIMATIONS = {
         }
     },
 
-    // Movimiento elíptico
-    elliptical: {
-        position: {
-            x: (t) => 12 * Math.sin(t),
-            y: (t) => 6,
-            z: (t) => 6 * Math.cos(t)
-        },
-        lookAt: {
-            x: (t) => 0,
-            y: (t) => 0,
-            z: (t) => 0
-        }
-    },
-
     // Movimiento en espiral ascendente
     spiral: {
         position: {
@@ -41,40 +27,12 @@ export const CAMERA_ANIMATIONS = {
         }
     },
 
-    // Movimiento en forma de 8 (lemniscata)
-    figure8: {
-        position: {
-            x: (t) => 8 * Math.sin(t),
-            y: (t) => 5 + 3 * Math.sin(2 * t),
-            z: (t) => 8 * Math.cos(t)
-        },
-        lookAt: {
-            x: (t) => 0,
-            y: (t) => 0,
-            z: (t) => 0
-        }
-    },
-
-    // Movimiento ondulante
-    wave: {
-        position: {
-            x: (t) => 10 * Math.sin(t),
-            y: (t) => 5 + 4 * Math.sin(t * 3),
-            z: (t) => 10 * Math.cos(t)
-        },
-        lookAt: {
-            x: (t) => 0,
-            y: (t) => 0,
-            z: (t) => 0
-        }
-    },
-
     // Movimiento pendular
     pendulum: {
         position: {
-            x: (t) => 8 * Math.sin(Math.sin(t * 0.5) * 1.5),
+            x: (t) => 8 * Math.sin(Math.sin(t * 1.5) * 0.8),
             y: (t) => 7,
-            z: (t) => 8 * Math.cos(Math.sin(t * 0.5) * 1.5)
+            z: (t) => 8
         },
         lookAt: {
             x: (t) => 0,
@@ -97,73 +55,17 @@ export const CAMERA_ANIMATIONS = {
         }
     },
 
-    // Movimiento vertical serpenteante
-    snake: {
-        position: {
-            x: (t) => 8 * Math.sin(t) + 2 * Math.sin(t * 5),
-            y: (t) => 5 + 3 * Math.sin(t * 2),
-            z: (t) => 8 * Math.cos(t) + 2 * Math.cos(t * 5)
-        },
-        lookAt: {
-            x: (t) => 0,
-            y: (t) => Math.sin(t),
-            z: (t) => 0
-        }
-    },
-
-    // Movimiento orbital con precesión
-    precession: {
-        position: {
-            x: (t) => 8 * Math.sin(t) * Math.cos(t * 0.1),
-            y: (t) => 5 + 2 * Math.sin(t * 0.1),
-            z: (t) => 8 * Math.cos(t) * Math.cos(t * 0.1)
-        },
-        lookAt: {
-            x: (t) => 0,
-            y: (t) => 0,
-            z: (t) => 0
-        }
-    },
-
-    // Movimiento en trébol (rosa de tres pétalos)
-    clover: {
-        position: {
-            x: (t) => 6 * Math.sin(3 * t) * Math.sin(t),
-            y: (t) => 6,
-            z: (t) => 6 * Math.sin(3 * t) * Math.cos(t)
-        },
-        lookAt: {
-            x: (t) => 0,
-            y: (t) => 0,
-            z: (t) => 0
-        }
-    },
-
     // Movimiento en espiral descendente
     tornado: {
         position: {
-            x: (t) => (10 - t * 0.1) * Math.sin(t * 2),
-            y: (t) => 8 - t * 0.05,
-            z: (t) => (10 - t * 0.1) * Math.cos(t * 2)
+            x: (t) => (12 - t * 0.15) * Math.sin(t * 3),
+            y: (t) => 10 - t * 0.1,
+            z: (t) => (12 - t * 0.15) * Math.cos(t * 3)
         },
         lookAt: {
             x: (t) => 0,
-            y: (t) => 0,
+            y: (t) => 5 - t * 0.05,
             z: (t) => 0
-        }
-    },
-
-    // Movimiento caótico
-    chaos: {
-        position: {
-            x: (t) => 8 * Math.sin(t) + 3 * Math.sin(t * 1.7) + Math.sin(t * 3.3),
-            y: (t) => 5 + 2 * Math.sin(t * 1.3) + Math.cos(t * 2.7),
-            z: (t) => 8 * Math.cos(t) + 3 * Math.cos(t * 1.7) + Math.cos(t * 3.3)
-        },
-        lookAt: {
-            x: (t) => Math.sin(t * 0.7),
-            y: (t) => Math.cos(t * 0.3),
-            z: (t) => Math.sin(t * 0.5)
         }
     },
 
@@ -181,33 +83,20 @@ export const CAMERA_ANIMATIONS = {
         }
     },
 
-    // Cámara que sigue una trayectoria de montaña rusa
-    rollercoaster: {
+    // Movimiento en espiral con vibración
+    vibration: {
         position: {
-            x: (t) => 10 * Math.sin(t),
-            y: (t) => 3 + 6 * Math.abs(Math.sin(t * 2)),
-            z: (t) => 10 * Math.cos(t)
+            x: (t) => 8 * Math.sin(t * 0.1) + 0.5 * Math.sin(t * 20),
+            y: (t) => 5 + 1 * Math.sin(t * 20),                
+            z: (t) => 8 * Math.cos(t * 0.1) + 0.5 * Math.cos(t * 20)
         },
         lookAt: {
-            x: (t) => 5 * Math.sin(t + 0.5),
-            y: (t) => 0,
-            z: (t) => 5 * Math.cos(t + 0.5)
-        }
-    },
-
-    // Movimiento en forma de DNA (doble hélice)
-    dna: {
-        position: {
-            x: (t) => 6 * Math.sin(t),
-            y: (t) => t * 0.5,
-            z: (t) => 6 * Math.cos(t)
-        },
-        lookAt: {
-            x: (t) => 3 * Math.sin(t + Math.PI),
-            y: (t) => t * 0.5,
-            z: (t) => 3 * Math.cos(t + Math.PI)
+            x: (t) => 0.1 * Math.sin(t * 10),
+            y: (t) => 0.1 * Math.cos(t * 15),
+            z: (t) => 0.1 * Math.sin(t * 10)
         }
     }
+
 };
 
 // Función helper para aplicar una animación con configuración personalizada

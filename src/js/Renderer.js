@@ -87,7 +87,7 @@ export class Renderer {
             const deltaY = event.clientY - this.mouseControls.mouseY;
 
             this.mouseControls.theta += deltaX * this.mouseControls.rotationSpeed;
-            this.mouseControls.phi += deltaY * this.mouseControls.rotationSpeed;
+            this.mouseControls.phi -= deltaY * this.mouseControls.rotationSpeed;
 
             // Limitar rotación vertical
             this.mouseControls.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.mouseControls.phi));
@@ -204,17 +204,31 @@ export class Renderer {
             const look = this.animationConfig.lookAt;
             const t = this.animationConfig.time;
             
+            // Actualizar posición de la cámara
             this.cameraInstance.camera.position.set(
                 pos.x(t),
                 pos.y(t),
                 pos.z(t)
             );
             
-            this.cameraInstance.camera.lookAt(
-                look.x(t),
-                look.y(t),
-                look.z(t)
-            );
+            // Calcular y aplicar el lookAt
+            const lookAtPoint = {
+                x: look.x(t),
+                y: look.y(t),
+                z: look.z(t)
+            };
+            
+            this.cameraInstance.camera.lookAt(lookAtPoint.x, lookAtPoint.y, lookAtPoint.z);
+            
+            // Deshabilitar controles durante la animación
+            if (this.cameraInstance.controls) {
+                this.cameraInstance.controls.enabled = false;
+            }
+        } else {
+            // Habilitar controles cuando no hay animación
+            if (this.cameraInstance.controls) {
+                this.cameraInstance.controls.enabled = true;
+            }
         }
         
         this.render();
@@ -225,5 +239,9 @@ export class Renderer {
         this.animationConfig.speed = speed;
         if (position) this.animationConfig.position = { ...this.animationConfig.position, ...position };
         if (lookAt) this.animationConfig.lookAt = { ...this.animationConfig.lookAt, ...lookAt };
+    }
+
+    setAnimationSpeed(speed) {
+        this.animationConfig.speed = speed;
     }
 }
