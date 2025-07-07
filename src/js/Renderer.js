@@ -16,6 +16,22 @@ export class Renderer {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x111111);
 
+        // Variables para controles de mouse
+        this.mouseControls = {
+            isMouseDown: false,
+            mouseX: 0,
+            mouseY: 0,
+            rotationSpeed: 0.005,
+            radius: 10,
+            theta: 0,
+            phi: Math.PI / 2
+        };
+
+        // AÑADIR: Sincronizar con posición actual de la cámara
+        this.syncMouseControlsWithCamera();
+
+        this.setupMouseControls();
+
         // Events
         window.addEventListener('resize', () => this.onWindowResize());
 
@@ -41,37 +57,65 @@ export class Renderer {
         this.animate();
     }
 
-    setAnimation({ enabled = true, speed = 0.01, position, lookAt }) {
-        this.animationConfig.enabled = enabled;
-        this.animationConfig.speed = speed;
-        if (position) this.animationConfig.position = { ...this.animationConfig.position, ...position };
-        if (lookAt) this.animationConfig.lookAt = { ...this.animationConfig.lookAt, ...lookAt };
+    syncMouseControlsWithCamera() {
+        const pos = this.cameraInstance.camera.position;
+        this.mouseControls.radius = Math.sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
+        this.mouseControls.theta = Math.atan2(pos.z, pos.x);
+        this.mouseControls.phi = Math.acos(pos.y / this.mouseControls.radius);
     }
 
-    animate() {
-        requestAnimationFrame(() => this.animate());
-        
-        if (this.animationConfig.enabled) {
-            this.animationConfig.time += this.animationConfig.speed;
+    setupMouseControls() {
+        const canvas = this.renderer.domElement;
+
+        canvas.addEventListener('mousedown', (event) => {
+            // Sincronizar al empezar a arrastrar
+            this.syncMouseControlsWithCamera();
             
-            const pos = this.animationConfig.position;
-            const look = this.animationConfig.lookAt;
-            const t = this.animationConfig.time;
+            this.mouseControls.isMouseDown = true;
+            this.mouseControls.mouseX = event.clientX;
+            this.mouseControls.mouseY = event.clientY;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            this.mouseControls.isMouseDown = false;
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (!this.mouseControls.isMouseDown || this.animationConfig.enabled) return;
+
+            const deltaX = event.clientX - this.mouseControls.mouseX;
+            const deltaY = event.clientY - this.mouseControls.mouseY;
+
+            this.mouseControls.theta += deltaX * this.mouseControls.rotationSpeed;
+            this.mouseControls.phi += deltaY * this.mouseControls.rotationSpeed;
+
+            // Limitar rotación vertical
+            this.mouseControls.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.mouseControls.phi));
+
+            this.updateCameraPosition();
+
+            this.mouseControls.mouseX = event.clientX;
+            this.mouseControls.mouseY = event.clientY;
+        });
+
+        // Zoom con scroll
+        canvas.addEventListener('wheel', (event) => {
+            if (this.animationConfig.enabled) return;
             
-            this.cameraInstance.camera.position.set(
-                pos.x(t),
-                pos.y(t),
-                pos.z(t)
-            );
-            
-            this.cameraInstance.camera.lookAt(
-                look.x(t),
-                look.y(t),
-                look.z(t)
-            );
-        }
-        
-        this.render();
+            event.preventDefault();
+            this.mouseControls.radius += event.deltaY * 0.01;
+            this.mouseControls.radius = Math.max(2, Math.min(50, this.mouseControls.radius));
+            this.updateCameraPosition();
+        });
+    }
+
+    updateCameraPosition() {
+        const x = this.mouseControls.radius * Math.sin(this.mouseControls.phi) * Math.cos(this.mouseControls.theta);
+        const y = this.mouseControls.radius * Math.cos(this.mouseControls.phi);
+        const z = this.mouseControls.radius * Math.sin(this.mouseControls.phi) * Math.sin(this.mouseControls.theta);
+
+        this.cameraInstance.camera.position.set(x, y, z);
+        this.cameraInstance.camera.lookAt(0, 0, 0);
     }
 
     // Crea un mesh con geometría y material, y lo añade a la escena
@@ -147,5 +191,39 @@ export class Renderer {
         this.cameraInstance.onResize();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.render();
+    }
+
+    // Inicia la animación de la cámara si está habilitada
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        
+        if (this.animationConfig.enabled) {
+            this.animationConfig.time += this.animationConfig.speed;
+            
+            const pos = this.animationConfig.position;
+            const look = this.animationConfig.lookAt;
+            const t = this.animationConfig.time;
+            
+            this.cameraInstance.camera.position.set(
+                pos.x(t),
+                pos.y(t),
+                pos.z(t)
+            );
+            
+            this.cameraInstance.camera.lookAt(
+                look.x(t),
+                look.y(t),
+                look.z(t)
+            );
+        }
+        
+        this.render();
+    }
+
+    setAnimation({ enabled = true, speed = 0.01, position, lookAt }) {
+        this.animationConfig.enabled = enabled;
+        this.animationConfig.speed = speed;
+        if (position) this.animationConfig.position = { ...this.animationConfig.position, ...position };
+        if (lookAt) this.animationConfig.lookAt = { ...this.animationConfig.lookAt, ...lookAt };
     }
 }

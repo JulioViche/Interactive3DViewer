@@ -2,10 +2,35 @@ import { renderer } from './main.js';
 import { CAMERA_ANIMATIONS, createCustomAnimation } from './CameraAnimations.js';
 
 // Configurar cámara (opcional)
-renderer.camera().setPosition(0, 3, 8);
+renderer.camera().setPosition(10, 10, 10);
+renderer.camera().setLookAt(0, 0, 0);
 
 renderer.addPointLight({
-    position: { x: 10, y: 0, z: 10 },
+    position: { x: 100, y: 0, z: 0 },
+    color: 0xff7777,
+    intensity: 10,
+    distance: 1000,
+    decay: 0.01
+});
+
+renderer.addPointLight({
+    position: { x: 0, y: 100, z: 0 },
+    color: 0x77ff77,
+    intensity: 10,
+    distance: 1000,
+    decay: 0.01
+});
+
+renderer.addPointLight({
+    position: { x: 0, y: 0, z: 100 },
+    color: 0x7777ff,
+    intensity: 10,
+    distance: 1000,
+    decay: 0.01
+});
+
+renderer.addPointLight({
+    position: { x: -100, y: -100, z: -100 },
     color: 0xffffff,
     intensity: 10,
     distance: 1000,
@@ -34,8 +59,8 @@ renderer.renderSphere({
     radius: 1,
     material: {
         color: 0x000000,
-        roughness: 0.85,
-        metalness: 0,
+        roughness: 0.15,
+        metalness: 0.75,
     }
 });
 
@@ -44,19 +69,18 @@ renderer.renderCone({
     radius: 1,
     height: Math.PI / 2,
     material: {
-        color: 0xff7700,
-        roughness: 0.33,
-        metalness: 0.9
+        color: 0xffffff,
+        roughness: 0,
+        metalness: 1
     }
 });
 
-
 // Aplicar una animación predefinida
-renderer.setAnimation({
-    enabled: true,
-    speed: 0.05,
-    ...CAMERA_ANIMATIONS.figure8
-});
+// renderer.setAnimation({
+//     enabled: true,
+//     speed: 0.05,
+//     ...CAMERA_ANIMATIONS.figure8
+// });
 
 // Crear animación personalizada
 // const customWave = createCustomAnimation(CAMERA_ANIMATIONS.wave, {
