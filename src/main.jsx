@@ -5,7 +5,6 @@ import { UI } from './components/UI';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
-		<div id="renderer"></div>
 		<UI />
 	</StrictMode>,
 );

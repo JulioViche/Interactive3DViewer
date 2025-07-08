@@ -25,7 +25,6 @@ export function changeAnimation(animationType) {
         if (!renderer.animationConfig.enabled) {
             renderer.animationConfig.time = 0;
         }
-        
         renderer.setAnimation({
             enabled: true,
             speed: currentSpeed,
