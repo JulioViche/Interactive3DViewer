@@ -1,28 +1,38 @@
 import { useThree } from '@react-three/fiber'
 import { OrbitControls, Grid } from '@react-three/drei'
 import { useSceneStore } from '../store'
+import { useAnimations } from '../hooks/useAnimations'
+import { useSmoothCameraTransition } from '../hooks/useSmoothCameraTransition'
 import * as THREE from 'three'
 import { useEffect, useRef } from 'react'
 
 export default function Scene() {
-  const { scene } = useThree()
-  const { rotateSpeed, zoomSpeed, panSpeed, objects, showGrid, originalCameraPosition, originalCameraLookAt } = useSceneStore()
+  const { camera, scene } = useThree()
+  const { 
+    rotateSpeed, zoomSpeed, panSpeed, 
+    objects, showGrid, 
+    originalCameraPosition, originalCameraLookAt,
+    currentCameraPosition, currentCameraLookAt,
+    mouseControlsEnabled, currentAnimation
+  } = useSceneStore()
   const orbitControlsRef = useRef()
+  
+  // Hook de animaciones
+  const { resetAnimation } = useAnimations(camera, orbitControlsRef.current)
+  
+  // Hook de transiciones suaves
+  const { startTransition } = useSmoothCameraTransition(camera, orbitControlsRef.current)
 
   scene.background = new THREE.Color('#070707')
 
-  // Manejar reset de cámara
+  // Manejar eventos globales
   useEffect(() => {
     const handleResetCamera = () => {
       if (orbitControlsRef.current) {
-        // Reset position
-        orbitControlsRef.current.object.position.set(...originalCameraPosition)
-        
-        // Reset target (lookAt)
-        orbitControlsRef.current.target.set(...originalCameraLookAt)
-        
-        // Update controls
-        orbitControlsRef.current.update()
+        // Resetear el timing interno de la animación
+        resetAnimation()
+        // Usar transición suave para volver a la posición original
+        startTransition(originalCameraPosition, originalCameraLookAt)
       }
     }
 
@@ -31,7 +41,25 @@ export default function Scene() {
     return () => {
       window.removeEventListener('resetCamera', handleResetCamera)
     }
-  }, [originalCameraPosition, originalCameraLookAt])
+  }, [originalCameraPosition, originalCameraLookAt, resetAnimation])
+
+  // Manejar cambios en currentAnimation
+  useEffect(() => {
+    if (currentAnimation === 'none' && orbitControlsRef.current) {
+      // Resetear el timing interno de la animación
+      resetAnimation()
+      
+      // Cuando se detiene una animación, sincronizar los controles con la posición actual
+      // Esto es necesario para que los controles del mouse funcionen desde la posición actual
+      requestAnimationFrame(() => {
+        if (orbitControlsRef.current) {
+          orbitControlsRef.current.object.position.copy(camera.position)
+          orbitControlsRef.current.target.set(0, 0, 0)
+          orbitControlsRef.current.update()
+        }
+      })
+    }
+  }, [currentAnimation, resetAnimation, camera])
 
   const getMaterial = (materialType) => {
     switch (materialType) {
@@ -80,9 +108,10 @@ export default function Scene() {
     <>
       <OrbitControls
         ref={orbitControlsRef}
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
+        enabled={mouseControlsEnabled && currentAnimation === 'none'}
+        enablePan={mouseControlsEnabled}
+        enableZoom={mouseControlsEnabled}
+        enableRotate={mouseControlsEnabled}
         zoomSpeed={zoomSpeed}
         panSpeed={panSpeed}
         rotateSpeed={rotateSpeed}
@@ -104,8 +133,9 @@ export default function Scene() {
         />
       )}
 
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[10, 10, 10]} intensity={1.2} color="#ffffff" />
+      <pointLight position={[-10, 5, -10]} intensity={0.8} color="#ffffff" />
       
       {/* Renderizar objetos dinámicos */}
       {objects.map(renderObject)}

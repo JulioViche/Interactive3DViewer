@@ -1,14 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSceneStore } from '../store'
 import FormField from './FormField'
+import DraggablePanel from './DraggablePanel'
 
-export default function AddObjectForm() {
+export default function AddObjectForm({ onClose }) {
   const { addObject } = useSceneStore()
-  
-  // Estados para drag and drop
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [position, setPosition] = useState({ x: 350, y: 16 })
   
   // Estados del formulario
   const [objectType, setObjectType] = useState('cube')
@@ -22,40 +18,6 @@ export default function AddObjectForm() {
   const [sphereRadius, setSphereRadius] = useState(1)
   const [coneBaseRadius, setConeBaseRadius] = useState(1)
   const [coneHeight, setConeHeight] = useState(2)
-
-  // Funciones para drag and drop
-  const handleMouseDown = (e) => {
-    setIsDragging(true)
-    setDragOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
-    })
-  }
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (isDragging) {
-        setPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y
-        })
-      }
-    }
-
-    const handleMouseUp = () => {
-      setIsDragging(false)
-    }
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [isDragging, dragOffset])
 
   const handleAddObject = () => {
     const baseObject = {
@@ -90,18 +52,32 @@ export default function AddObjectForm() {
     setSphereRadius(1)
     setConeBaseRadius(1)
     setConeHeight(2)
+    
+    // Close form after adding object
+    if (onClose) {
+      setTimeout(() => onClose(), 500) // Small delay to show success feedback
+    }
   }
 
+  const headerButtons = [
+    {
+      onClick: handleAddObject,
+      icon: 'bi bi-check-lg',
+      title: 'Add Object to Scene',
+      className: 'btn-outline-success'
+    }
+  ]
+
   const objectTypes = [
-    { value: 'cube', label: 'Cube' },
-    { value: 'sphere', label: 'Sphere' },
-    { value: 'cone', label: 'Cone' }
+    { value: 'cube', label: 'Cubo' },
+    { value: 'sphere', label: 'Esfera' },
+    { value: 'cone', label: 'Cono' }
   ]
 
   const materials = [
     { value: 'metal', label: 'Metal' },
-    { value: 'crystal', label: 'Crystal' },
-    { value: 'plastic', label: 'Plastic' }
+    { value: 'crystal', label: 'Cristal' },
+    { value: 'plastic', label: 'Plástico' }
   ]
 
   const renderSpecificFields = () => {
@@ -109,8 +85,8 @@ export default function AddObjectForm() {
       case 'cube':
         return (
           <FormField
-            label="Size"
-            icon="bi-square"
+            label="Tamaño"
+            icon=""
             value={cubeSize}
             onChange={(e) => setCubeSize(+e.target.value)}
             min={0.1}
@@ -121,8 +97,8 @@ export default function AddObjectForm() {
       case 'sphere':
         return (
           <FormField
-            label="Radius"
-            icon="bi-circle"
+            label="Radio"
+            icon=""
             value={sphereRadius}
             onChange={(e) => setSphereRadius(+e.target.value)}
             min={0.1}
@@ -134,8 +110,8 @@ export default function AddObjectForm() {
         return (
           <>
             <FormField
-              label="Base Radius"
-              icon="bi-triangle"
+              label="Radio de la base"
+              icon=""
               value={coneBaseRadius}
               onChange={(e) => setConeBaseRadius(+e.target.value)}
               min={0.1}
@@ -143,8 +119,8 @@ export default function AddObjectForm() {
               step={0.1}
             />
             <FormField
-              label="Height"
-              icon="bi-arrows-vertical"
+              label="Altura"
+              icon=""
               value={coneHeight}
               onChange={(e) => setConeHeight(+e.target.value)}
               min={0.1}
@@ -159,105 +135,82 @@ export default function AddObjectForm() {
   }
 
   return (
-    <div 
-      className="card position-fixed bg-dark text-light border-secondary shadow-lg"
-      style={{ 
-        zIndex: 1000, 
-        minWidth: '320px',
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        cursor: isDragging ? 'grabbing' : 'default'
-      }}
+    <DraggablePanel
+      title="Añadir Elementos"
+      icon="bi-plus-circle"
+      onClose={onClose}
+      initialPosition={{ x: 680, y: 16 }}
+      headerButtons={headerButtons}
     >
-      <div 
-        className="card-header bg-dark border-secondary d-flex justify-content-between align-items-center"
-        onMouseDown={handleMouseDown}
-        style={{ cursor: 'grab' }}
-      >
-        <h6 className="card-title mb-0 text-light fw-bold">
-          <i className="bi bi-plus-circle me-2"></i>
-          Add Object
-        </h6>
-        <button 
-          className="btn btn-sm btn-outline-light"
-          onClick={handleAddObject}
-        >
-          <i className="bi bi-check-lg me-1"></i>
-          Add
-        </button>
-      </div>
-      
-      <div className="card-body bg-dark p-3">
-        <FormField
-          label="Object Type"
-          icon="bi-shapes"
-          type="select"
-          value={objectType}
-          onChange={(e) => setObjectType(e.target.value)}
-          options={objectTypes}
-        />
+      <FormField
+        label="Elemento"
+        icon="bi-shapes"
+        type="select"
+        value={objectType}
+        onChange={(e) => setObjectType(e.target.value)}
+        options={objectTypes}
+      />
 
-        <FormField
-          label="Material"
-          icon="bi-palette"
-          type="select"
-          value={material}
-          onChange={(e) => setMaterial(e.target.value)}
-          options={materials}
-        />
+      <FormField
+        label="Material"
+        icon="bi-palette"
+        type="select"
+        value={material}
+        onChange={(e) => setMaterial(e.target.value)}
+        options={materials}
+      />
 
-        <hr className="border-secondary" />
+      <hr className="border-secondary" />
 
-        <h6 className="text-light mb-3">
-          <i className="bi bi-geo-alt me-1"></i>
-          Position
-        </h6>
+      <h6 className="text-light mb-3">
+        <i className="bi bi-geo-alt me-1"></i>
+        Posición
+      </h6>
 
-        <div className="row">
-          <div className="col-4">
-            <FormField
-              label="X"
-              icon="bi-arrow-left-right"
-              value={posX}
-              onChange={(e) => setPosX(+e.target.value)}
-              min={-10}
-              max={10}
-              step={0.1}
-            />
-          </div>
-          <div className="col-4">
-            <FormField
-              label="Y"
-              icon="bi-arrow-up-down"
-              value={posY}
-              onChange={(e) => setPosY(+e.target.value)}
-              min={-10}
-              max={10}
-              step={0.1}
-            />
-          </div>
-          <div className="col-4">
-            <FormField
-              label="Z"
-              icon="bi-arrow-bar-up"
-              value={posZ}
-              onChange={(e) => setPosZ(+e.target.value)}
-              min={-10}
-              max={10}
-              step={0.1}
-            />
-          </div>
+      <div className="row">
+        <div className="col-4">
+          <FormField
+            label="Z"
+            icon="bi-arrow-down-left"
+            value={posZ}
+            onChange={(e) => setPosZ(+e.target.value)}
+            min={-10}
+            max={10}
+            step={0.1}
+          />
         </div>
-
-        <hr className="border-secondary" />
-
-        <h6 className="text-light mb-3">
-          <i className="bi bi-rulers me-1"></i>
-          Dimensions
-        </h6>
-
-        {renderSpecificFields()}
+        <div className="col-4">
+          <FormField
+            label="Y"
+            icon="bi-arrow-up"
+            value={posY}
+            onChange={(e) => setPosY(+e.target.value)}
+            min={-10}
+            max={10}
+            step={0.1}
+          />
+        </div>
+        <div className="col-4">
+          <FormField
+            label="X"
+            icon="bi-arrow-down-right"
+            value={posX}
+            onChange={(e) => setPosX(+e.target.value)}
+            min={-10}
+            max={10}
+            step={0.1}
+          />
+        </div>
       </div>
-    </div>
+
+      <hr className="border-secondary" />
+
+      <h6 className="text-light mb-3">
+        <i className="bi bi-rulers me-1"></i>
+        Dimensiones
+      </h6>
+
+      {renderSpecificFields()}
+    </DraggablePanel>
   )
 }

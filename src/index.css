@@ -18,9 +18,64 @@ html, body {
   padding: 0;
 }
 
+/* Deshabilitar menú contextual del navegador */
+html, body, #root, canvas {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 .card, .btn, .form-label, .alert {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+}
+
+/* Ensure all UI elements stay within viewport */
+.position-fixed {
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+/* Prevent any element from overflowing viewport */
+.card.position-fixed {
+  max-width: calc(100vw - 20px);
+  max-height: calc(100vh - 20px);
+  word-wrap: break-word;
+}
+
+/* Ensure proper z-index stacking */
+.card.position-fixed {
+  z-index: 999;
+}
+
+/* ActionButtons should be above other panels */
+.action-buttons {
+  z-index: 1000;
+}
+
+/* Feedback animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Keyboard key styling */
+kbd {
+  padding: 2px 4px;
+  font-size: 0.75em;
+  color: #fff;
+  background-color: #495057;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 }

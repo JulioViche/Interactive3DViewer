@@ -6,14 +6,15 @@ export default function Slider({
     min = 0.1, 
     max = 2.0, 
     step = 0.1,
-    badgeColor = 'bg-primary'
 }) {
     return (
-        <div className="mb-0">
-            <label className="form-label text-light fw-semibold">
-                <i className={`bi ${icon} me-1`}></i>
-                {label}: 
-                <span className={`badge ${badgeColor} ms-2`}>{value.toFixed(1)}</span>
+        <div className="mb-3">
+            <label className="form-label text-light fw-bold d-flex justify-content-between">
+                <span>
+                    <i className={`bi ${icon} me-2`}></i>
+                    {label}
+                </span>
+                <span className="badge">{value.toFixed(1)}x</span>
             </label>
             <input
                 type="range"
@@ -24,14 +25,6 @@ export default function Slider({
                 value={value}
                 onChange={onChange}
             />
-            <div className="d-flex justify-content-between">
-                <small className="text-muted">
-                <i className="bi bi-speedometer2 me-1"></i>Slow
-                </small>
-                <small className="text-muted">
-                Fast<i className="bi bi-lightning ms-1"></i>
-                </small>
-            </div>
         </div>
     )
 }
