@@ -74,6 +74,12 @@ export default function App() {
           position: [8, 8, 8], 
           fov: 75 
         }}
+        // desactivar antialiasing en caso de bajo rendimiento
+        gl={{ 
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance"
+        }}
       >
         <Scene />
       </Canvas>

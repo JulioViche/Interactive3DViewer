@@ -64,13 +64,13 @@ export default function Scene() {
   const getMaterial = (materialType) => {
     switch (materialType) {
       case 'metal':
-        return { color: '#C0C0C0', metalness: 0.9, roughness: 0.1 }
+        return { color: '#CCCCCC', metalness: 0.9, roughness: 0.1 }
       case 'crystal':
-        return { color: '#E0F6FF', metalness: 0.0, roughness: 0.0, transparent: true, opacity: 0.8 }
+        return { color: '#E0F6FF', metalness: 0.5, roughness: 0.0, transparent: true, opacity: 0.25 }
       case 'plastic':
-        return { color: '#FF6B6B', metalness: 0.0, roughness: 0.7 }
+        return { color: '#FF6B6B', metalness: 0.0, roughness: 0.6 }
       default:
-        return { color: 'orange', metalness: 0.5, roughness: 0.3 }
+        return { color: '#FF00FF', metalness: 0, roughness: 1 }
     }
   }
 
@@ -88,14 +88,14 @@ export default function Scene() {
       case 'sphere':
         return (
           <mesh key={obj.id} position={obj.position}>
-            <sphereGeometry args={[obj.radius, 16, 16]} />
+            <sphereGeometry args={[obj.radius, 64, 64]} />
             <meshStandardMaterial {...material} />
           </mesh>
         )
       case 'cone':
         return (
           <mesh key={obj.id} position={obj.position}>
-            <coneGeometry args={[obj.baseRadius, obj.height, 8]} />
+            <coneGeometry args={[obj.baseRadius, obj.height, 256]} />
             <meshStandardMaterial {...material} />
           </mesh>
         )
@@ -133,9 +133,10 @@ export default function Scene() {
         />
       )}
 
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={1.2} color="#ffffff" />
-      <pointLight position={[-10, 5, -10]} intensity={0.8} color="#ffffff" />
+      <ambientLight intensity={0.2} />
+      <directionalLight position={[10, 10, -10]} intensity={1.5} color="#ffffff"/>
+      <directionalLight position={[-10, 7, -10]} intensity={0.5} color="#ffffff"/>
+      <pointLight position={[-10, 12, -10]} intensity={0.6} color="#ffffff" />
       
       {/* Renderizar objetos dinámicos */}
       {objects.map(renderObject)}
