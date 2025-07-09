@@ -61,6 +61,15 @@ export default function Scene() {
     }
   }, [currentAnimation, resetAnimation, camera])
 
+  // Actualizar sensibilidad sin resetear la cámara
+  useEffect(() => {
+    if (orbitControlsRef.current) {
+      orbitControlsRef.current.rotateSpeed = rotateSpeed
+      orbitControlsRef.current.zoomSpeed = zoomSpeed
+      orbitControlsRef.current.panSpeed = panSpeed
+    }
+  }, [rotateSpeed, zoomSpeed, panSpeed])
+
   const getMaterial = (materialType) => {
     switch (materialType) {
       case 'metal':
@@ -112,9 +121,6 @@ export default function Scene() {
         enablePan={mouseControlsEnabled}
         enableZoom={mouseControlsEnabled}
         enableRotate={mouseControlsEnabled}
-        zoomSpeed={zoomSpeed}
-        panSpeed={panSpeed}
-        rotateSpeed={rotateSpeed}
         minDistance={2}
         maxDistance={50}
       />
