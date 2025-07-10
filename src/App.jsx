@@ -68,17 +68,34 @@ export default function App() {
   return (
     <>
       <UI />
-      <Canvas 
+      <Canvas
         style={{ width: '100vw', height: '100vh' }}
-        camera={{ 
-          position: [8, 8, 8], 
-          fov: 75 
+        camera={{
+          position: [8, 8, 8],
+          fov: 75
         }}
-        // desactivar antialiasing en caso de bajo rendimiento
-        gl={{ 
+        gl={{
           antialias: true,
           alpha: true,
           powerPreference: "high-performance"
+        }}
+        onPointerMissed={() => {
+          // Deselecciona objeto si se hace click fuera de cualquier mesh
+          import('./store').then(mod => {
+            const store = mod.useSceneStore.getState()
+            const selectedId = store.selectedObjectId
+            
+            // Si hay un objeto seleccionado, guardar su estado antes de deseleccionar
+            if (selectedId) {
+              // Trigger saving before deselection by dispatching a custom event
+              window.dispatchEvent(new CustomEvent('saveSelectedObject', { detail: { objectId: selectedId } }))
+              
+              // Small delay to ensure save happens before deselection
+              setTimeout(() => {
+                store.setSelectedObjectId(null)
+              }, 10)
+            }
+          })
         }}
       >
         <Scene />

@@ -1,6 +1,13 @@
 import { create } from 'zustand'
 
 export const useSceneStore = create((set) => ({
+  // Selección y manipulación de objetos
+  selectedObjectId: null,
+  setSelectedObjectId: (id) => set({ selectedObjectId: id }),
+  transformMode: 'translate', // 'translate' | 'rotate' | 'scale'
+  setTransformMode: (mode) => set({ transformMode: mode }),
+  isTransforming: false,
+  setIsTransforming: (val) => set({ isTransforming: val }),
   // Configuración de sensibilidad
   rotateSpeed: 0.4,
   zoomSpeed: 0.6,
@@ -52,6 +59,14 @@ export const useSceneStore = create((set) => ({
   
   removeObject: (id) => set((state) => ({
     objects: state.objects.filter(obj => obj.id !== id)
+  })),
+
+  updateObject: (id, updates) => set((state) => ({
+    objects: state.objects.map(obj =>
+      obj.id === id
+        ? { ...obj, ...updates }
+        : obj
+    )
   })),
   
   clearObjects: () => set({ objects: [] }),

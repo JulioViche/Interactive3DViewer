@@ -145,7 +145,7 @@ export default function UI() {
         <AddObjectForm onClose={() => setShowAddObjectForm(false)} />
       )}
 
-      {/* Botones de Acción Fijos */}
+      {/* Botones de manipulación de objetos (Mover/Rotar/Escalar) */}
       <ActionButtons />
       
       {/* Feedback de controles del mouse */}

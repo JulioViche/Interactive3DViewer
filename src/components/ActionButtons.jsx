@@ -8,7 +8,9 @@ export default function ActionButtons() {
     mouseControlsEnabled, setMouseControlsEnabled,
     currentAnimation, setCurrentAnimation,
     originalCameraPosition, originalCameraLookAt,
-    setActionButtonsRect
+    setActionButtonsRect,
+    transformMode, setTransformMode,
+    selectedObject
   } = useSceneStore()
 
   // Update action buttons rect in store when component mounts or resizes
@@ -108,6 +110,42 @@ export default function ActionButtons() {
       className="action-buttons position-fixed top-0 end-0 m-3 d-flex flex-column gap-2"
       style={{ zIndex: 1000 }}
     >
+      {/* Transform Mode Buttons (only show when object is selected) */}
+      {selectedObject && (
+        <>
+          <div className="d-flex flex-column gap-1 mb-2 p-2 bg-dark bg-opacity-50 rounded">
+            <small className="text-light text-center opacity-75">Transform Mode</small>
+            
+            {/* Move/Translate Button */}
+            <button 
+              className={`btn btn-sm ${transformMode === 'translate' ? 'btn-primary' : 'btn-outline-light'} shadow-sm`}
+              onClick={() => setTransformMode('translate')}
+              title="Move (G)"
+            >
+              <i className="bi bi-arrows-move"></i>
+            </button>
+
+            {/* Rotate Button */}
+            <button 
+              className={`btn btn-sm ${transformMode === 'rotate' ? 'btn-primary' : 'btn-outline-light'} shadow-sm`}
+              onClick={() => setTransformMode('rotate')}
+              title="Rotate (R)"
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+            </button>
+
+            {/* Scale Button */}
+            <button 
+              className={`btn btn-sm ${transformMode === 'scale' ? 'btn-primary' : 'btn-outline-light'} shadow-sm`}
+              onClick={() => setTransformMode('scale')}
+              title="Scale (S)"
+            >
+              <i className="bi bi-arrows-angle-expand"></i>
+            </button>
+          </div>
+        </>
+      )}
+
       {/* Botón Reset Camera */}
       <button 
         className={`btn ${currentAnimation !== 'none' ? 'btn-transparent' : 'btn-dark'} border-secondary text-light shadow-sm`}

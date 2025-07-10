@@ -24,7 +24,9 @@ export default function AddObjectForm({ onClose }) {
       id: Date.now(),
       type: objectType,
       material: material,
-      position: [posX, posY, posZ]
+      position: [posX, posY, posZ],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1]
     }
 
     let objectData = { ...baseObject }

@@ -1,19 +1,21 @@
+import React, { useEffect, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
-import { OrbitControls, Grid } from '@react-three/drei'
+import { OrbitControls, Grid, TransformControls } from '@react-three/drei'
 import { useSceneStore } from '../store'
 import { useAnimations } from '../hooks/useAnimations'
 import { useSmoothCameraTransition } from '../hooks/useSmoothCameraTransition'
 import * as THREE from 'three'
-import { useEffect, useRef } from 'react'
 
 export default function Scene() {
   const { camera, scene } = useThree()
-  const { 
-    rotateSpeed, zoomSpeed, panSpeed, 
-    objects, showGrid, 
+  const {
+    rotateSpeed, zoomSpeed, panSpeed,
+    objects, showGrid,
     originalCameraPosition, originalCameraLookAt,
-    currentCameraPosition, currentCameraLookAt,
-    mouseControlsEnabled, currentAnimation
+    mouseControlsEnabled, currentAnimation,
+    selectedObjectId, setSelectedObjectId,
+    transformMode,
+    updateObject
   } = useSceneStore()
   const orbitControlsRef = useRef()
   
@@ -29,9 +31,7 @@ export default function Scene() {
   useEffect(() => {
     const handleResetCamera = () => {
       if (orbitControlsRef.current) {
-        // Resetear el timing interno de la animación
         resetAnimation()
-        // Usar transición suave para volver a la posición original
         startTransition(originalCameraPosition, originalCameraLookAt)
       }
     }
@@ -41,16 +41,51 @@ export default function Scene() {
     return () => {
       window.removeEventListener('resetCamera', handleResetCamera)
     }
-  }, [originalCameraPosition, originalCameraLookAt, resetAnimation])
+  }, [originalCameraPosition, originalCameraLookAt, resetAnimation, startTransition])
+
+  // Atajos de teclado para modo de transformación
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Solo actuar si hay un objeto seleccionado
+      if (!selectedObjectId) return
+      
+      // Evitar que los atajos interfieran con inputs/textareas
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return
+      
+      const { setTransformMode } = useSceneStore.getState()
+      
+      switch (event.key.toLowerCase()) {
+        case 'g':
+          event.preventDefault()
+          setTransformMode('translate')
+          break
+        case 'r':
+          event.preventDefault()
+          setTransformMode('rotate')
+          break
+        case 's':
+          event.preventDefault()
+          setTransformMode('scale')
+          break
+        case 'escape':
+          // Deseleccionar objeto con ESC
+          event.preventDefault()
+          setSelectedObjectId(null)
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [selectedObjectId, setSelectedObjectId])
 
   // Manejar cambios en currentAnimation
   useEffect(() => {
     if (currentAnimation === 'none' && orbitControlsRef.current) {
-      // Resetear el timing interno de la animación
       resetAnimation()
-      
-      // Cuando se detiene una animación, sincronizar los controles con la posición actual
-      // Esto es necesario para que los controles del mouse funcionen desde la posición actual
       requestAnimationFrame(() => {
         if (orbitControlsRef.current) {
           orbitControlsRef.current.object.position.copy(camera.position)
@@ -83,44 +118,91 @@ export default function Scene() {
     }
   }
 
-  const renderObject = (obj) => {
-    const material = getMaterial(obj.material)
-    
-    switch (obj.type) {
-      case 'cube':
-        return (
-          <mesh key={obj.id} position={obj.position}>
-            <boxGeometry args={[obj.size, obj.size, obj.size]} />
-            <meshStandardMaterial {...material} />
-          </mesh>
-        )
-      case 'sphere':
-        return (
-          <mesh key={obj.id} position={obj.position}>
-            <sphereGeometry args={[obj.radius, 64, 64]} />
-            <meshStandardMaterial {...material} />
-          </mesh>
-        )
-      case 'cone':
-        return (
-          <mesh key={obj.id} position={obj.position}>
-            <coneGeometry args={[obj.baseRadius, obj.height, 256]} />
-            <meshStandardMaterial {...material} />
-          </mesh>
-        )
-      default:
-        return null
-    }
+  // Seleccionar objeto
+  const handleObjectClick = (e, obj) => {
+    e.stopPropagation()
+    setSelectedObjectId(obj.id)
   }
 
+  // Guardar referencias a los meshes
+  const meshRefs = useRef({})
+  const saveTimeoutRef = useRef(null)
+
+  // Función de guardado con throttling
+  const saveWithThrottle = (objId, meshRef) => {
+    // Cancelar el timeout anterior si existe
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+    
+    // Crear un nuevo timeout para guardar después de 100ms de inactividad
+    saveTimeoutRef.current = setTimeout(() => {
+      if (meshRef.current) {
+        const newPosition = [meshRef.current.position.x, meshRef.current.position.y, meshRef.current.position.z]
+        const newRotation = [meshRef.current.rotation.x, meshRef.current.rotation.y, meshRef.current.rotation.z]
+        const newScale = [meshRef.current.scale.x, meshRef.current.scale.y, meshRef.current.scale.z]
+        
+        updateObject(objId, {
+          position: newPosition,
+          rotation: newRotation,
+          scale: newScale
+        })
+        console.log('Objeto guardado:', { position: newPosition, rotation: newRotation, scale: newScale })
+      }
+    }, 100)
+  }
+
+  // Componente simple con TransformControls
+  function SelectableMesh({ obj, isSelected }) {
+    const material = getMaterial(obj.material)
+    
+    if (!meshRefs.current[obj.id]) {
+      meshRefs.current[obj.id] = React.createRef()
+    }
+    const meshRef = meshRefs.current[obj.id]
+
+    const mesh = (
+      <mesh 
+        ref={meshRef}
+        position={obj.position || [0,0,0]}
+        rotation={obj.rotation || [0,0,0]}
+        scale={obj.scale || [1,1,1]}
+        onClick={(e) => handleObjectClick(e, obj)}
+      >
+        {obj.type === 'cube' && <boxGeometry args={[obj.size, obj.size, obj.size]} />}
+        {obj.type === 'sphere' && <sphereGeometry args={[obj.radius, 64, 64]} />}
+        {obj.type === 'cone' && <coneGeometry args={[obj.baseRadius, obj.height, 256]} />}
+        <meshStandardMaterial {...material} color={isSelected ? '#00ff00' : material.color} />
+      </mesh>
+    )
+
+    if (isSelected) {
+      return (
+        <TransformControls
+          object={meshRef}
+          mode={transformMode}
+          onObjectChange={() => {
+            // Usar throttling para evitar guardadas excesivas
+            saveWithThrottle(obj.id, meshRef)
+          }}
+        >
+          {mesh}
+        </TransformControls>
+      )
+    }
+
+    return mesh
+  }
+
+  // Renderizado principal sin mesh invisible. Deselección se debe manejar en el Canvas (App.jsx)
   return (
     <>
       <OrbitControls
         ref={orbitControlsRef}
-        enabled={mouseControlsEnabled && currentAnimation === 'none'}
-        enablePan={mouseControlsEnabled}
-        enableZoom={mouseControlsEnabled}
-        enableRotate={mouseControlsEnabled}
+        enabled={mouseControlsEnabled && currentAnimation === 'none' && !selectedObjectId}
+        enablePan={mouseControlsEnabled && !selectedObjectId}
+        enableZoom={mouseControlsEnabled && !selectedObjectId}
+        enableRotate={mouseControlsEnabled && !selectedObjectId}
         minDistance={2}
         maxDistance={50}
       />
@@ -144,8 +226,11 @@ export default function Scene() {
       <directionalLight position={[-10, 7, -10]} intensity={0.5} color="#ffffff"/>
       <pointLight position={[-10, 12, -10]} intensity={0.6} color="#ffffff" />
       
-      {/* Renderizar objetos dinámicos */}
-      {objects.map(renderObject)}
+      {/* Renderizar objetos dinámicos y controles de transformación */}
+      {objects.map(obj => (
+        <SelectableMesh key={obj.id} obj={obj} isSelected={obj.id === selectedObjectId} />
+      ))}
     </>
   )
+
 }
