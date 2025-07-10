@@ -185,7 +185,7 @@ export default function Scene() {
       if (!selectedObjectId) return
       // Evitar que los atajos interfieran con inputs/textareas
       if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return
-      const { setTransformMode } = useSceneStore.getState()
+      const { setTransformMode, removeObject } = useSceneStore.getState()
       switch (event.key.toLowerCase()) {
         case 'g':
           event.preventDefault()
@@ -201,6 +201,14 @@ export default function Scene() {
           break
         case 'escape':
           event.preventDefault()
+          setSelectedObjectId(null)
+          break
+        case 'delete':
+        case 'backspace':
+        case 'enter':
+        case 'return':
+          event.preventDefault()
+          removeObject(selectedObjectId)
           setSelectedObjectId(null)
           break
       }
