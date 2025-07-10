@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'
-import { useThree } from '@react-three/fiber'
+import React, { useEffect, useRef, useState } from 'react'
+import { useThree, useFrame } from '@react-three/fiber'
 import { OrbitControls, Grid, TransformControls } from '@react-three/drei'
 import { useSceneStore } from '../store'
 import { useAnimations } from '../hooks/useAnimations'
@@ -8,6 +8,7 @@ import * as THREE from 'three'
 
 export default function Scene() {
   const { camera, scene } = useThree()
+  const [gridPosition, setGridPosition] = useState([0, 0, 0])
   const {
     rotateSpeed, zoomSpeed, panSpeed,
     objects, showGrid,
@@ -24,6 +25,23 @@ export default function Scene() {
   
   // Hook de transiciones suaves
   const { startTransition } = useSmoothCameraTransition(camera, orbitControlsRef.current)
+
+  // Actualizar posición del grid de forma suave usando useFrame
+  useFrame(() => {
+    // Solo actualizar el grid si los controles del mouse están habilitados y no hay animación
+    if (mouseControlsEnabled && currentAnimation === 'none') {
+      // Intervalo cada 10 unidades para movimiento menos frecuente
+      const currentX = Math.round(camera.position.x / 10) * 10
+      const currentZ = Math.round(camera.position.z / 10) * 10
+      
+      setGridPosition(prev => {
+        if (prev[0] !== currentX || prev[2] !== currentZ) {
+          return [currentX, 0, currentZ]
+        }
+        return prev
+      })
+    }
+  })
 
   scene.background = new THREE.Color('#070707')
 
@@ -43,45 +61,6 @@ export default function Scene() {
     }
   }, [originalCameraPosition, originalCameraLookAt, resetAnimation, startTransition])
 
-  // Atajos de teclado para modo de transformación
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      // Solo actuar si hay un objeto seleccionado
-      if (!selectedObjectId) return
-      
-      // Evitar que los atajos interfieran con inputs/textareas
-      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return
-      
-      const { setTransformMode } = useSceneStore.getState()
-      
-      switch (event.key.toLowerCase()) {
-        case 'g':
-          event.preventDefault()
-          setTransformMode('translate')
-          break
-        case 'r':
-          event.preventDefault()
-          setTransformMode('rotate')
-          break
-        case 's':
-          event.preventDefault()
-          setTransformMode('scale')
-          break
-        case 'escape':
-          // Deseleccionar objeto con ESC
-          event.preventDefault()
-          setSelectedObjectId(null)
-          break
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [selectedObjectId, setSelectedObjectId])
-
   // Manejar cambios en currentAnimation
   useEffect(() => {
     if (currentAnimation === 'none' && orbitControlsRef.current) {
@@ -89,7 +68,7 @@ export default function Scene() {
       requestAnimationFrame(() => {
         if (orbitControlsRef.current) {
           orbitControlsRef.current.object.position.copy(camera.position)
-          orbitControlsRef.current.target.set(0, 0, 0)
+          // No resetear el target, mantener el actual
           orbitControlsRef.current.update()
         }
       })
@@ -207,7 +186,7 @@ export default function Scene() {
         maxDistance={50}
       />
 
-      {/* Grid condicional */}
+      {/* Grid que sigue dinámicamente a la cámara */}
       {showGrid && (
         <Grid
           infiniteGrid={true}
@@ -215,9 +194,9 @@ export default function Scene() {
           cellColor="#333333"
           sectionSize={10}
           sectionColor="#777777"
-          fadeDistance={200}
+          fadeDistance={1000}
           fadeStrength={5}
-          position={[0, 0, 0]}
+          position={gridPosition}
         />
       )}
 

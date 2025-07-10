@@ -18,6 +18,12 @@ export default function AddObjectForm({ onClose }) {
   const [sphereRadius, setSphereRadius] = useState(1)
   const [coneBaseRadius, setConeBaseRadius] = useState(1)
   const [coneHeight, setConeHeight] = useState(2)
+  // Cilindro
+  const [cylinderRadius, setCylinderRadius] = useState(1)
+  const [cylinderHeight, setCylinderHeight] = useState(2)
+  // Pirámide
+  const [pyramidBase, setPyramidBase] = useState(1)
+  const [pyramidHeight, setPyramidHeight] = useState(2)
 
   const handleAddObject = () => {
     const baseObject = {
@@ -42,6 +48,14 @@ export default function AddObjectForm({ onClose }) {
         objectData.baseRadius = coneBaseRadius
         objectData.height = coneHeight
         break
+      case 'cylinder':
+        objectData.radius = cylinderRadius
+        objectData.height = cylinderHeight
+        break
+      case 'pyramid':
+        objectData.base = pyramidBase
+        objectData.height = pyramidHeight
+        break
     }
 
     addObject(objectData)
@@ -54,6 +68,10 @@ export default function AddObjectForm({ onClose }) {
     setSphereRadius(1)
     setConeBaseRadius(1)
     setConeHeight(2)
+    setCylinderRadius(1)
+    setCylinderHeight(2)
+    setPyramidBase(1)
+    setPyramidHeight(2)
     
     // Close form after adding object
     if (onClose) {
@@ -73,7 +91,9 @@ export default function AddObjectForm({ onClose }) {
   const objectTypes = [
     { value: 'cube', label: 'Cubo' },
     { value: 'sphere', label: 'Esfera' },
-    { value: 'cone', label: 'Cono' }
+    { value: 'cone', label: 'Cono' },
+    { value: 'cylinder', label: 'Cilindro' },
+    { value: 'pyramid', label: 'Pirámide' }
   ]
 
   const materials = [
@@ -125,6 +145,52 @@ export default function AddObjectForm({ onClose }) {
               icon=""
               value={coneHeight}
               onChange={(e) => setConeHeight(+e.target.value)}
+              min={0.1}
+              max={5}
+              step={0.1}
+            />
+          </>
+        )
+      case 'cylinder':
+        return (
+          <>
+            <FormField
+              label="Radio"
+              icon=""
+              value={cylinderRadius}
+              onChange={(e) => setCylinderRadius(+e.target.value)}
+              min={0.1}
+              max={3}
+              step={0.1}
+            />
+            <FormField
+              label="Altura"
+              icon=""
+              value={cylinderHeight}
+              onChange={(e) => setCylinderHeight(+e.target.value)}
+              min={0.1}
+              max={5}
+              step={0.1}
+            />
+          </>
+        )
+      case 'pyramid':
+        return (
+          <>
+            <FormField
+              label="Base"
+              icon=""
+              value={pyramidBase}
+              onChange={(e) => setPyramidBase(+e.target.value)}
+              min={0.1}
+              max={5}
+              step={0.1}
+            />
+            <FormField
+              label="Altura"
+              icon=""
+              value={pyramidHeight}
+              onChange={(e) => setPyramidHeight(+e.target.value)}
               min={0.1}
               max={5}
               step={0.1}
