@@ -151,6 +151,11 @@ export default function Scene() {
         {obj.type === 'cube' && <boxGeometry args={[obj.size, obj.size, obj.size]} />}
         {obj.type === 'sphere' && <sphereGeometry args={[obj.radius, 64, 64]} />}
         {obj.type === 'cone' && <coneGeometry args={[obj.baseRadius, obj.height, 256]} />}
+        {obj.type === 'cylinder' && <cylinderGeometry args={[obj.radius, obj.radius, obj.height, 128]} />}
+        {obj.type === 'pyramid' && (
+          // Pirámide: base cuadrada, 4 lados
+          <coneGeometry args={[obj.base, obj.height, 4]} />
+        )}
         <meshStandardMaterial {...material} color={isSelected ? '#00ff00' : material.color} />
       </mesh>
     )
@@ -172,6 +177,39 @@ export default function Scene() {
 
     return mesh
   }
+
+  // Atajos de teclado para modo de transformación
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Solo actuar si hay un objeto seleccionado
+      if (!selectedObjectId) return
+      // Evitar que los atajos interfieran con inputs/textareas
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return
+      const { setTransformMode } = useSceneStore.getState()
+      switch (event.key.toLowerCase()) {
+        case 'g':
+          event.preventDefault()
+          setTransformMode('translate')
+          break
+        case 'r':
+          event.preventDefault()
+          setTransformMode('rotate')
+          break
+        case 's':
+          event.preventDefault()
+          setTransformMode('scale')
+          break
+        case 'escape':
+          event.preventDefault()
+          setSelectedObjectId(null)
+          break
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [selectedObjectId, setSelectedObjectId])
 
   // Renderizado principal sin mesh invisible. Deselección se debe manejar en el Canvas (App.jsx)
   return (
@@ -195,7 +233,7 @@ export default function Scene() {
           sectionSize={10}
           sectionColor="#777777"
           fadeDistance={1000}
-          fadeStrength={5}
+          fadeStrength={10}
           position={gridPosition}
         />
       )}
