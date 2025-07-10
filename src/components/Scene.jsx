@@ -8,18 +8,24 @@ import * as THREE from 'three'
 import { TextureLoader } from 'three'
 
 export default function Scene() {
-  // Cargar textura de madera si existe
+  // Cargar textura de madera y mármol si existen
   let woodTexture = null
+  let marbleTexture = null
   try {
     woodTexture = useLoader(TextureLoader, '/textures/wood.jpg')
   } catch (e) {
     woodTexture = null
   }
+  try {
+    marbleTexture = useLoader(TextureLoader, '/textures/marble.jpg')
+  } catch (e) {
+    marbleTexture = null
+  }
   const { camera, scene } = useThree()
   const [gridPosition, setGridPosition] = useState([0, 0, 0])
   const {
     rotateSpeed, zoomSpeed, panSpeed,
-    objects, showGrid,
+    objects, showGrid, showAxes,
     originalCameraPosition, originalCameraLookAt,
     mouseControlsEnabled, currentAnimation,
     selectedObjectId, setSelectedObjectId,
@@ -95,9 +101,9 @@ export default function Scene() {
   const getMaterial = (materialType) => {
     switch (materialType) {
       case 'metal':
-        return { color: '#CCCCCC', metalness: 0.9, roughness: 0.1 }
+        return { color: '#CCCCCC', metalness: 0.95, roughness: 0.33 }
       case 'crystal':
-        return { color: '#E0F6FF', metalness: 0.5, roughness: 0.0, transparent: true, opacity: 0.25 }
+        return { color: '#E0F6FF', metalness: 0.5, roughness: 0.0, transparent: true, opacity: 0.1, side: THREE.DoubleSide }
       case 'plastic':
         return { color: '#FF6B6B', metalness: 0.0, roughness: 0.6 }
       case 'gold':
@@ -108,8 +114,14 @@ export default function Scene() {
         } else {
           return { color: '#b97a56', metalness: 0.1, roughness: 0.8 }
         }
+      case 'marble':
+        if (marbleTexture) {
+          return { map: marbleTexture, color: '#eaeaea', metalness: 0.2, roughness: 0.05 }
+        } else {
+          return { color: '#eaeaea', metalness: 0.2, roughness: 0.15 }
+        }
       default:
-        return { color: '#FF00FF', metalness: 0, roughness: 1 }
+        return { color: '#FF00FF', metalness: 0, roughness: 0.15 }
     }
   }
 
@@ -256,13 +268,15 @@ export default function Scene() {
           cellColor="#333333"
           sectionSize={10}
           sectionColor="#777777"
-          fadeDistance={1000}
+          fadeDistance={500}
           fadeStrength={10}
           position={gridPosition}
         />
       )}
 
-      <ambientLight intensity={0.2} />
+      {showAxes && <axesHelper args={[1000000]} />}
+
+      <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, -10]} intensity={1.5} color="#ffffff"/>
       <directionalLight position={[-10, 7, -10]} intensity={0.5} color="#ffffff"/>
       <pointLight position={[-10, 12, -10]} intensity={0.6} color="#ffffff" />

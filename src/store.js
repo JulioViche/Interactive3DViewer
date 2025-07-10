@@ -32,8 +32,9 @@ export const useSceneStore = create((set) => ({
     }
   ],
   
-  // Configuración de grid
+  // Configuración de grid y ejes
   showGrid: true,
+  showAxes: true,
   
   // Posición original
   originalCameraPosition: [8, 8, 8],
@@ -82,9 +83,12 @@ export const useSceneStore = create((set) => ({
   
   clearObjects: () => set({ objects: [] }),
   
-  // Funciones para grid
+  // Funciones para grid y ejes
   toggleGrid: () => set((state) => ({
     showGrid: !state.showGrid
+  })),
+  toggleAxes: () => set((state) => ({
+    showAxes: !state.showAxes
   })),
   
   // Función para reset de cámara (será usado por el botón)

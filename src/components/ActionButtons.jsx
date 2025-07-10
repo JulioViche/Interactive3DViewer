@@ -5,13 +5,17 @@ export default function ActionButtons() {
   const buttonsPanelRef = useRef(null)
   const { 
     showGrid, toggleGrid, 
+    showAxes, toggleAxes,
     mouseControlsEnabled, setMouseControlsEnabled,
     currentAnimation, setCurrentAnimation,
     originalCameraPosition, originalCameraLookAt,
     setActionButtonsRect,
     transformMode, setTransformMode,
-    selectedObject
+    selectedObjectId, objects
   } = useSceneStore()
+
+  // Obtener el objeto seleccionado real
+  const selectedObject = objects.find(obj => obj.id === selectedObjectId)
 
   // Update action buttons rect in store when component mounts or resizes
   const updateActionButtonsRect = () => {
@@ -110,41 +114,6 @@ export default function ActionButtons() {
       className="action-buttons position-fixed top-0 end-0 m-3 d-flex flex-column gap-2"
       style={{ zIndex: 1000 }}
     >
-      {/* Transform Mode Buttons (only show when object is selected) */}
-      {selectedObject && (
-        <>
-          <div className="d-flex flex-column gap-1 mb-2 p-2 bg-dark bg-opacity-50 rounded">
-            <small className="text-light text-center opacity-75">Transform Mode</small>
-            
-            {/* Move/Translate Button */}
-            <button 
-              className={`btn btn-sm ${transformMode === 'translate' ? 'btn-primary' : 'btn-outline-light'} shadow-sm`}
-              onClick={() => setTransformMode('translate')}
-              title="Move (G)"
-            >
-              <i className="bi bi-arrows-move"></i>
-            </button>
-
-            {/* Rotate Button */}
-            <button 
-              className={`btn btn-sm ${transformMode === 'rotate' ? 'btn-primary' : 'btn-outline-light'} shadow-sm`}
-              onClick={() => setTransformMode('rotate')}
-              title="Rotate (R)"
-            >
-              <i className="bi bi-arrow-clockwise"></i>
-            </button>
-
-            {/* Scale Button */}
-            <button 
-              className={`btn btn-sm ${transformMode === 'scale' ? 'btn-primary' : 'btn-outline-light'} shadow-sm`}
-              onClick={() => setTransformMode('scale')}
-              title="Scale (S)"
-            >
-              <i className="bi bi-arrows-angle-expand"></i>
-            </button>
-          </div>
-        </>
-      )}
 
       {/* Botón Reset Camera */}
       <button 
@@ -155,13 +124,23 @@ export default function ActionButtons() {
         <i className="bi bi-house"></i>
       </button>
 
+
       {/* Botón Toggle Grid */}
       <button 
         className={`btn ${showGrid ? 'btn-dark' : 'btn-transparent'} border-secondary text-light shadow-sm`}
         onClick={toggleGrid}
-        title={showGrid ? "Hide Grid" : "Show Grid"}
+        title={showGrid ? "Ocultar grilla" : "Mostrar grilla"}
       >
         <i className="bi bi-grid-3x3"></i>
+      </button>
+
+      {/* Botón Toggle Axes */}
+      <button 
+        className={`btn ${showAxes ? 'btn-dark' : 'btn-transparent'} border-secondary text-light shadow-sm`}
+        onClick={toggleAxes}
+        title={showAxes ? "Ocultar ejes" : "Mostrar ejes"}
+      >
+        <i className="bi bi-crosshair2"></i>
       </button>
 
       {/* Botón Mouse Controls */}
@@ -170,12 +149,39 @@ export default function ActionButtons() {
         onClick={toggleMouseControls}
         title={
           currentAnimation !== 'none' 
-            ? "Stop Animation & Enable Mouse Controls" 
-            : (mouseControlsEnabled ? "Disable Mouse Controls" : "Enable Mouse Controls")
+          ? "Stop Animation & Enable Mouse Controls" 
+          : (mouseControlsEnabled ? "Disable Mouse Controls" : "Enable Mouse Controls")
         }
-      >
+        >
         <i className="bi bi-mouse2"></i>
       </button>
+
+      {/* Botones de Transformación (solo si hay objeto seleccionado) */}
+      {selectedObject && (
+        <div className="d-flex flex-column gap-2">
+          <button 
+            className={`btn btn-dark border-secondary text-light shadow-sm ${transformMode === 'translate' ? 'active' : ''}`}
+            onClick={() => setTransformMode('translate')}
+            title="Mover (G)"
+          >
+            <i className="bi bi-arrows-move"></i>
+          </button>
+          <button 
+            className={`btn btn-dark border-secondary text-light shadow-sm ${transformMode === 'rotate' ? 'active' : ''}`}
+            onClick={() => setTransformMode('rotate')}
+            title="Rotar (R)"
+          >
+            <i className="bi bi-arrow-clockwise"></i>
+          </button>
+          <button 
+            className={`btn btn-dark border-secondary text-light shadow-sm ${transformMode === 'scale' ? 'active' : ''}`}
+            onClick={() => setTransformMode('scale')}
+            title="Escalar (S)"
+          >
+            <i className="bi bi-arrows-angle-expand"></i>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
