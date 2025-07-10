@@ -9,10 +9,15 @@ export default function CameraControlsUI({ onClose }) {
     panSpeed, setPanSpeed 
   } = useSceneStore()
 
+  // Valores iniciales del store (deben coincidir con el store.js)
+  const INITIAL_ROTATE = 0.5;
+  const INITIAL_ZOOM = 2;
+  const INITIAL_PAN = 1;
+
   const resetSensitivity = () => {
-    setRotateSpeed(0.4)
-    setZoomSpeed(0.6)
-    setPanSpeed(0.8)
+    setRotateSpeed(INITIAL_ROTATE);
+    setZoomSpeed(INITIAL_ZOOM);
+    setPanSpeed(INITIAL_PAN);
   }
 
   const headerButtons = [
@@ -38,7 +43,7 @@ export default function CameraControlsUI({ onClose }) {
         value={zoomSpeed}
         onChange={(e) => setZoomSpeed(+e.target.value)}
         min={0.1}
-        max={3.0}
+        max={4.0}
       />
 
       <Slider
@@ -47,7 +52,7 @@ export default function CameraControlsUI({ onClose }) {
         value={rotateSpeed}
         onChange={(e) => setRotateSpeed(+e.target.value)}
         min={0.1}
-        max={2.0}
+        max={1.0}
       />
       
       <Slider
@@ -56,7 +61,7 @@ export default function CameraControlsUI({ onClose }) {
         value={panSpeed}
         onChange={(e) => setPanSpeed(+e.target.value)}
         min={0.1}
-        max={2.5}
+        max={2.0}
       />
     </DraggablePanel>
   )

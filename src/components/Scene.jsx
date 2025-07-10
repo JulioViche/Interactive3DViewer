@@ -1,12 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useThree, useFrame } from '@react-three/fiber'
+import { useThree, useFrame, useLoader } from '@react-three/fiber'
 import { OrbitControls, Grid, TransformControls } from '@react-three/drei'
 import { useSceneStore } from '../store'
 import { useAnimations } from '../hooks/useAnimations'
 import { useSmoothCameraTransition } from '../hooks/useSmoothCameraTransition'
 import * as THREE from 'three'
+import { TextureLoader } from 'three'
 
 export default function Scene() {
+  // Cargar textura de madera si existe
+  let woodTexture = null
+  try {
+    woodTexture = useLoader(TextureLoader, '/textures/wood.jpg')
+  } catch (e) {
+    woodTexture = null
+  }
   const { camera, scene } = useThree()
   const [gridPosition, setGridPosition] = useState([0, 0, 0])
   const {
@@ -92,6 +100,14 @@ export default function Scene() {
         return { color: '#E0F6FF', metalness: 0.5, roughness: 0.0, transparent: true, opacity: 0.25 }
       case 'plastic':
         return { color: '#FF6B6B', metalness: 0.0, roughness: 0.6 }
+      case 'gold':
+        return { color: '#FFD700', metalness: 0.95, roughness: 0.2 }
+      case 'wood':
+        if (woodTexture) {
+          return { map: woodTexture, color: '#b97a56', metalness: 0.1, roughness: 0.8 }
+        } else {
+          return { color: '#b97a56', metalness: 0.1, roughness: 0.8 }
+        }
       default:
         return { color: '#FF00FF', metalness: 0, roughness: 1 }
     }
@@ -156,7 +172,7 @@ export default function Scene() {
           // Pirámide: base cuadrada, 4 lados
           <coneGeometry args={[obj.base, obj.height, 4]} />
         )}
-        <meshStandardMaterial {...material} color={isSelected ? '#00ff00' : material.color} />
+        <meshStandardMaterial {...material} color={isSelected ? '#00ff00' : material.color} map={material.map} />
       </mesh>
     )
 

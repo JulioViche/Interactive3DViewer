@@ -99,7 +99,9 @@ export default function AddObjectForm({ onClose }) {
   const materials = [
     { value: 'metal', label: 'Metal' },
     { value: 'crystal', label: 'Cristal' },
-    { value: 'plastic', label: 'Plástico' }
+    { value: 'plastic', label: 'Plástico' },
+    { value: 'gold', label: 'Oro' },
+    { value: 'wood', label: 'Madera' }
   ]
 
   const renderSpecificFields = () => {

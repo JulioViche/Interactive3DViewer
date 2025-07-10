@@ -8,18 +8,29 @@ export const useSceneStore = create((set) => ({
   setTransformMode: (mode) => set({ transformMode: mode }),
   isTransforming: false,
   setIsTransforming: (val) => set({ isTransforming: val }),
+
   // Configuración de sensibilidad
-  rotateSpeed: 0.4,
-  zoomSpeed: 0.6,
-  panSpeed: 0.8,
+  rotateSpeed: 0.5,
+  zoomSpeed: 2,
+  panSpeed: 1,
   
   // Configuración de animaciones
-  animationSpeed: 0.2,
-  currentAnimation: 'orbit',
+  animationSpeed: 0.5,
+  currentAnimation: 'spiral',
   mouseControlsEnabled: false, // Inicialmente deshabilitado porque hay animación
   
   // Objetos en la escena
-  objects: [],
+  objects: [
+    {
+      id: 1,
+      type: 'cube',
+      size: 2,
+      material: 'gold',
+      position: [0, 1, 0],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1]
+    }
+  ],
   
   // Configuración de grid
   showGrid: true,
